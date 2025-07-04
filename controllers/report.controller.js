@@ -5,7 +5,9 @@ import cloudinary from '../config/cloudinary.js';
 export const createReport = async (req, res) => {
     try {
         const user = req.user._id
-        const { type, description, location } = req.body
+        let { type, description, location } = req.body
+        location = JSON.parse(location)
+        
         const mediaFiles = req.files
         const cloudinaryUrls = []
 
