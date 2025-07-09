@@ -90,7 +90,7 @@ export const getUserReports = async (req, res) => {
 
         const user = req.user._id
 
-        const reports = await reportModel.find({ user, isActive: true })
+        const reports = await reportModel.find({ user, isActive: true }).sort({createdAt: -1})
         if (!reports.length) return res.status(404).json({ error: "reports not found" })
 
         res.status(200).json({
@@ -107,7 +107,7 @@ export const getUserReports = async (req, res) => {
 export const getAllReports = async (req, res) => {
     try {
 
-        const reports = await reportModel.find({ isActive: true }).populate({path : 'user', select : '-password'})
+        const reports = await reportModel.find({ isActive: true }).populate({path : 'user', select : '-password'}).sort({createdAt : -1})
         if (!reports.length) return res.status(404).json({ error: "report not found" })
 
         res.status(200).json({
@@ -116,7 +116,7 @@ export const getAllReports = async (req, res) => {
         })
 
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err.message)
 
     }
 }

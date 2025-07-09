@@ -23,7 +23,7 @@ export const createSupport = async (req, res) => {
 
 export const getAllSupports = async (req, res) => {
     try {
-        const support = await supportModel.find().populate({path: "user", select: "-password"})
+        const support = await supportModel.find().populate({path: "user", select: "-password"}).sort({createdAt : -1})
         res.status(200).json({
             message: "supports fetched",
             support

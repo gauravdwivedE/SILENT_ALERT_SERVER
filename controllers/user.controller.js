@@ -79,6 +79,7 @@ export const oAuthLogin = async (req, res) => {
                 Authorization: `Bearer ${accessToken}`
             }
         })
+        
         const {name, email, picture: image} = data
         
         const error = validateUser({name, email, image, password:"test1234"})
