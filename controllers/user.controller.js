@@ -1,4 +1,5 @@
 import userUtils from '../models/user.model.js';
+import { createLog } from '../controllers/log.controller.js';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken';
 import axios from 'axios'
@@ -57,6 +58,9 @@ export const login = async (req, res) => {
             {expiresIn: '2d'}
         ) 
 
+        let logDescription = 'Logged in'
+        createLog(userWithoutPassword._id, logDescription)
+
         res.status(200).json({
             message: 'Login successful',
             token,
@@ -70,7 +74,7 @@ export const login = async (req, res) => {
 
 export const oAuthLogin = async (req, res) => {
     try {
-    
+        
         const {accessToken} = req.body
         if(!accessToken) return res.status(400).json({error: "refresh token is required"}) 
         
@@ -91,6 +95,9 @@ export const oAuthLogin = async (req, res) => {
             user = await userModel.create({name, email, image, type:'google'})
         }
         const token = jwt.sign(user.toObject(), process.env.JWT_SECRET, {expiresIn: '2d'})
+
+        let logDescription = 'Logged in'
+        createLog(user._id, logDescription)
 
         res.status(200).json({
             message: "login successful", 
@@ -159,19 +166,19 @@ export const updateProfile = async (req, res) => {
 
 export const updateUserStatus = async (req, res) => {
     try {
+         const loggedInUserId = req.user._id
          const userId = req.params.id 
          const {status} = req.body
             
-         if(status == undefined){
-             return res.status(400).send("status is required")
-         }
-         
+         if(status == undefined) return res.status(400).send("status is required")
+        
          let user = await userModel.findByIdAndUpdate(userId, {isBlocked: status}, {new: true})
          
-         if(!user) {
-             return res.status(404).send("user not found")
-         }
-    
+         if(!user)  return res.status(404).send("user not found")
+         
+        let logDescription = `${status ? 'Blocked': 'Unblocked'} the user, id: ${user._id}, email ${user.email} `
+        createLog(loggedInUserId, logDescription)
+
          res.status(200).json({
             message:"user status updated",
             isBlocked: user.isBlocked
@@ -205,12 +212,16 @@ export const getUserById = async (req, res) => {
 
 export const updateUserRole = async (req, res) => {
     try {
+         const loggedInUserId = req.user._id
          const userId = req.params.id 
          const {role} = req.body
 
          const user = await userModel.findByIdAndUpdate(userId, {role}, {new: true, runValidators: true})
          if(!user) return res.status(404).send("user not found")
          
+        let logDescription = ` Updated the user role  as ${role}, id: ${user._id}, email ${user.email} `
+        createLog(loggedInUserId, logDescription)
+
          const {password:_, ...userWithoutPassword} = user.toObject()
 
          res.status(200).json({

@@ -1,5 +1,6 @@
 import reportUtils from '../models/report.model.js'
 const { validateReport, reportModel } = reportUtils
+import { createLog } from '../controllers/log.controller.js';
 import cloudinary from '../config/cloudinary.js';
 
 export const createReport = async (req, res) => {
@@ -125,12 +126,16 @@ export const getAllReports = async (req, res) => {
 
 export const updateReportStatus = async (req, res) => {
     try {
+        const loggedInUserId = req.user._id
         const reportId = req.params.id
         const { status } = req.body
 
         const report = await reportModel.findByIdAndUpdate(reportId, { status })
         if (!report) return res.status(404).json({ error: "report not found" })
 
+        let logDescription = `updated the report status as ${status}, report id: ${reportId}`
+        createLog(loggedInUserId, logDescription)
+    
         res.status(200).json({
             message: "report status updated",
         })

@@ -8,7 +8,7 @@ const router = Router()
 router.use(authenticate)
 
 router.post("/", createSupport)
-router.get("/", authorize(['superAdmin']), getAllSupports)
+router.get("/", authorize(['admin','superAdmin']), getAllSupports)
 router.patch("/:id/status", authorize(['admin', 'superAdmin']), updateSupportStatus)
 router.get("/users", getUsersSupport)
 
