@@ -3,15 +3,17 @@ import { login, signup, oAuthLogin, getLoginUser, updateProfile, updateUserStatu
 import { authenticate } from '../middlewares/authentication.js'
 import { isBlockedUser } from '../middlewares/isBlockedUser.js'
 import authorize from '../middlewares/authorization.js';
+import limiter from '../config/rateLimit.js';
 
 const router = Router()
 
-router.post("/", signup)
-router.post("/login", login)
-router.post("/oauth", oAuthLogin)
+router.post("/", limiter, signup)
+router.post("/login", limiter,login)
+router.post("/oauth", limiter, oAuthLogin)
 
 router.use(authenticate)
 router.get("/login", getLoginUser)
+router.use(limiter)
 router.use(isBlockedUser)
 
 router.get("/summary", authorize(['admin', 'superAdmin', 'inspector']), usersSummary)

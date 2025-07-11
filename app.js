@@ -20,10 +20,11 @@ app.use(fileUpload({
     tempFileDir: "/tmp/",
   })
 )
-// app.use(limiter)
+
+app.use("/api/users", userRouter)
+app.use(limiter)
 app.use("/api/logs", logRouter)
 app.use("/api/reports", reportRouter)
-app.use("/api/users", userRouter)
 app.use("/api/supports", supportRouter)
 
 export default app

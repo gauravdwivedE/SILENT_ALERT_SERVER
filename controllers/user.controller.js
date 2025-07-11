@@ -27,9 +27,15 @@ export const signup = async (req, res) => {
          user = await userModel.create({name, email, password: hashedPassword})
          const { password: _, ...userWithoutPassword } = user.toObject()
 
-        
+         const token = jwt.sign(
+            userWithoutPassword,
+            process.env.JWT_SECRET,
+            {expiresIn: '2d'}
+        ) 
+
         res.status(201).json({
             message: "user created successfully",
+            token,
             user: userWithoutPassword
         })
     } 
@@ -48,6 +54,8 @@ export const login = async (req, res) => {
         const user = await userModel.findOne({email})
         if(!user) return res.status(401).send("invalid email or password")
 
+        if(user.type == 'google') return res.status(401).send("invalid email or password")
+
         const isValid = await bcrypt.compare(password, user.password)
         if(!isValid) return  res.status(401).send("invalid email or password")
         
@@ -57,10 +65,11 @@ export const login = async (req, res) => {
             process.env.JWT_SECRET,
             {expiresIn: '2d'}
         ) 
-
+        const allowedRoles = ['admin', 'inspector', 'superAdmin']
+        if(allowedRoles.includes(user.role)){
         let logDescription = 'Logged in'
         createLog(userWithoutPassword._id, logDescription)
-
+        }
         res.status(200).json({
             message: 'Login successful',
             token,
