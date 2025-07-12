@@ -36,7 +36,7 @@ export const getAllSupports = async (req, res) => {
 export const getUsersSupport = async (req, res) => {
     try {
         const user = req.user.id
-        const support = await supportModel.findOne({user,  $or: [{ status: 'pending' }, { status: 'rejected' }] })
+        const support = await supportModel.findOne({user,  $or: [{ status: 'pending' }, { status: 'rejected' }] }).sort({createdAt: -1})
         if(!support) return res.status(404).json({error: "support not found"})
 
         res.status(200).json({
